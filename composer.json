@@ -1,0 +1,11 @@
+{
+    "name": "ocdladefense/mw-books-online",
+    "type": "wordpress-theme",
+    "authors": [
+        {
+            "name": "Jose Bernal",
+            "email": "jbernal.web.dev@gmail.com"
+        }
+    ],
+    "require": {}
+}
