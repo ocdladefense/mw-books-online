@@ -13,7 +13,7 @@ class BooksOnline {
 	private static $expiryMessage = "Your Books Online subscription %s";
 
 
-	private static $threshold = 400;
+	private static $threshold = 30;
 
 
 
