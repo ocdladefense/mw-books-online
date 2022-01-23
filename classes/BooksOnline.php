@@ -44,8 +44,14 @@ class BooksOnline {
 
 		
 		$subscription = self::getCurrentSubscription("Books Online");
+
+		// Request failed or some other unexpected condition,
+		// so bail out.
+		if(null == $subscription) return true;
+		
 		$orderStartDate = $subscription["Order"]["EffectiveDate"];
-		$startDate = new \DateTime($startDate);
+		$startDate = new \DateTime($orderStartDate);
+		
 		// Uncomment to mock an Order EffectiveDate
 		// $startDate = new \DateTime("2022-01-17");
 		$expiryDate = clone $startDate;
