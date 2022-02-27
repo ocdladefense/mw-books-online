@@ -10,84 +10,7 @@ namespace Ocdla;
 class BooksOnline {
 
 
-	private static $expiryMessage = "Your Books Online subscription %s";
-
-
-	private static $threshold = 30;
-
-
-
-
-
-	
-	/**
-     * 
-     */
-    public static function onBeforeInitialize( \Title &$title, $unused, \OutputPage $out, \User $user, \WebRequest $request, \MediaWiki $mediaWiki ) {
-
-
-		// Uncomment this line to make this hook do nothing.
-		// Useful when running into trouble with 
-		// any of the Salesforce API requests.
-		// return true;
-
-
-		// Don't show alerts for non-BON pages.
-		if(!self::isBooksOnlineNamespace()) return true;
-
-		// Don't show alerts for system administrators.
-		if(self::isAdministrator($user)) return true;
-
-		// Don't show alerts for guest users.
-		if($user->isAnon()) return true;
-
-
-		
-		$subscription = self::getCurrentSubscription("Books Online");
-
-		// Request failed or some other unexpected condition,
-		// so bail out.
-		if(null == $subscription) return true;
-		
-		$orderStartDate = $subscription["Order"]["EffectiveDate"];
-		$startDate = new \DateTime($orderStartDate);
-		
-		// Uncomment to mock an Order EffectiveDate
-		// $startDate = new \DateTime("2022-01-17");
-		$expiryDate = clone $startDate;
-		$expiryDate->modify("+365 day");
-
-
-		
-		$daysRemaining = self::daysFromToday($expiryDate);
-		
-		
-		// Subscription isn't going to expire soon,
-		//  so don't alert the customer.
-		if($daysRemaining > self::$threshold) return true;
-
-
-		$message = self::getAlertHtml($expiryDate, $daysRemaining);
-
-	
-
-		if(null != $message) {
-			$out->addModuleStyles( [
-				'ext.booksOnline.styles'
-			] );
-			$out->addHTML($message);
-		}
-		
-
-		return true;
-	}
-
-
-
-
-
-
-	public static function getAlertHtml($expiryDate, $daysRemaining) {
+	public static function getAlertHtml($message, $expiryDate, $daysRemaining) {
 
 		$template = "/var/www/html/extensions/BooksOnline/templates/bon-alert.tpl.php";
 		
@@ -95,15 +18,15 @@ class BooksOnline {
 		$renewThroughDate = clone $expiryDate;
 		$renewThroughDate->modify("+365 day");
 
-		$message = self::getFriendlyDateDifference($daysRemaining);
+		$notice = Date::getFriendlyDateDifference($message,$daysRemaining);
 
-		if(null == $message) return $message;
+		if(null == $notice) return $notice;
 
 
 		$params = array(
 			"expiryDate" => $expiryDate,
 			"renewThroughDate" => $renewThroughDate,
-			"message" => $message
+			"message" => $notice
 		);
 
 		return View::renderTemplate($template, $params);
@@ -111,74 +34,20 @@ class BooksOnline {
 	
 
 
-
-
-
-
-	public static function daysFromToday($date) {
-
-		$today = new \DateTime();
-
-
-		$intv = $date->diff($today);
-		$years = $intv->y;
-		$months = $intv->m;
-		$days = $intv->d;
-		// var_dump($intv); exit;
-
-		return ($years * 365) + ($months * 30) + $days;
-	}
-
-
-
-	public static function getFriendlyDateDifference($days) {
-
-
-
-		$abs = abs($days);
-
-
-
-		if($days < -1) {
-
-			$text = sprintf("expired %s days ago.", $abs);
-		} else if($days == -1) {
-			$text = "expired yesterday.";
-		} else if($days == 0) {
-			$text = "expires today.";
-		} else if($days == 1) {
-			$text = "expires tomorrow.";
-		} else if($days > 1) {
-			$text = sprintf("expires in %s days.", $abs);
-		}
-
-
+	public static function getSampleSubscription($status = "expiring") {
+		$sub = array(
+			"Order" => array("EffectiveDate" => "2021-03-01")
+		);
 		
-		return sprintf(self::$expiryMessage, $text);
+		return $sub;
 	}
-
-
-
-	public static function isAdministrator($user) {
-
-		return in_array("sysop", $user->getGroups());
-	}
-
-
-
-
-	public static function isBooksOnlineNamespace() {
-
-		global $wgOcdlaBooksOnlineNamespaces, $wgTitle;
-
-		return in_array($wgTitle->mNamespace, $wgOcdlaBooksOnlineNamespaces);
-	}
+	
 
 
 	/**
 	 * Load an instance of Salesforce\RestApiRequest();
 	 */
-	public static function getForceApi() {
+	public static function loadForceApi() {
 		$accessToken = $_SESSION["access-token"];
 		$instanceUrl = $_SESSION["instance-url"];
 
@@ -198,7 +67,7 @@ class BooksOnline {
 
 		$contactId = $_SESSION["sf-contact-id"];
 
-		$api = self::getForceApi();
+		$api = self::loadForceApi();
 
 		if(false === $api) return null;
 

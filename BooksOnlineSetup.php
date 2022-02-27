@@ -21,9 +21,11 @@ $dir = dirname( __FILE__ );
 
 // $wgExtensionMessagesFiles['BooksOnline'] = $dir . 'BooksOnline.i18n.php';
 $wgAutoloadClasses['Ocdla\View'] = $dir .'/classes/View.php';
+$wgAutoloadClasses['Ocdla\Date'] = $dir .'/classes/Date.php';
 $wgAutoloadClasses['Ocdla\BooksOnline'] = $dir .'/classes/BooksOnline.php';
+$wgAutoloadClasses['BooksOnlineHooks'] = $dir .'/BooksOnline.Hooks.php';
 
-$wgHooks['BeforeInitialize'][] = 'Ocdla\BooksOnline::onBeforeInitialize';
+$wgHooks['BeforeInitialize'][] = 'BooksOnlineHooks::onBeforeInitialize';
 	
 
 $wgResourceModules['ext.booksOnline.styles'] = array(
