@@ -58,6 +58,31 @@ class BooksOnline {
 	}
 
 
+	public static function loadApi($api) {
+
+		return self::loadForceApi();
+	}
+
+
+	public static function daysRemaining($subscription) {
+
+		// var_dump($subscription);exit;
+		// Request failed or some other unexpected condition,
+		// so bail out.
+		if(null == $subscription) return true;
+		
+		$orderStartDate = $subscription["Order"]["EffectiveDate"];
+		$startDate = new \DateTime($orderStartDate);
+		
+		// Uncomment to mock an Order EffectiveDate
+		$expiryDate = clone $startDate;
+		$expiryDate->modify("+365 day");
+
+
+		
+		return Date::daysFromToday($expiryDate);
+	}
+
 	
 
 
@@ -67,7 +92,7 @@ class BooksOnline {
 
 		$contactId = $_SESSION["sf-contact-id"];
 
-		$api = self::loadForceApi();
+		$api = self::loadApi("com.salesforce.restapi");
 
 		if(false === $api) return null;
 
