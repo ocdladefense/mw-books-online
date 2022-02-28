@@ -46,24 +46,24 @@ class BooksOnlineHooks {
 		if($user->isAnon()) return true;
 
 
-		
-		$subscription = self::$test ? BooksOnline::getSampleSubscription("expiring") : BooksOnline::getCurrentSubscription("Books Online");
+		$contactId = $_SESSION["sf-contact-id"];
+		$accessToken = $_SESSION["access-token"];
+		$instanceUrl = $_SESSION["instance-url"];
+
+
+		$orders = new OrderHistory($contactId);
+		$orders->initApi($instanceUrl, $accessToken);
+
+		$subscription = self::$test ? $orders->getSampleSubscription("expiring") : $orders->getCurrentSubscription("Books Online");
 
 		// var_dump($subscription);exit;
 		// Request failed or some other unexpected condition,
 		// so bail out.
 		if(null == $subscription) return true;
 		
-		$orderStartDate = $subscription["Order"]["EffectiveDate"];
-		$startDate = new \DateTime($orderStartDate);
-		
-		// Uncomment to mock an Order EffectiveDate
-		$expiryDate = clone $startDate;
-		$expiryDate->modify("+365 day");
-
 
 		
-		$daysRemaining = Date::daysFromToday($expiryDate);
+		$daysRemaining = $subscription->getDaysRemaining();
 		
 		
 		// Subscription isn't going to expire soon,
@@ -71,7 +71,7 @@ class BooksOnlineHooks {
 		if($daysRemaining > self::$threshold) return true;
 
 
-		$message = BooksOnline::getAlertHtml(
+		$message = $subscription->getAlertHtml(
 			self::$expiryMessage,
 			$expiryDate,
 			$daysRemaining
@@ -107,6 +107,9 @@ class BooksOnlineHooks {
 
 		return in_array($wgTitle->mNamespace, $wgOcdlaBooksOnlineNamespaces);
 	}
+
+
+
 
 
 }
