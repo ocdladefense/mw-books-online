@@ -1,7 +1,8 @@
 <?php
 
 
-use Ocdla\BooksOnline;
+use Ocdla\OrderHistory;
+use Ocdla\Subscription;
 use Ocdla\Date;
 
 
@@ -20,7 +21,7 @@ class BooksOnlineHooks {
 
 	// Set to force an expiring subscription.
 	// For testing purposes.
-	private static $test = false;
+	private static $test = true;
 
 
 	
@@ -51,19 +52,20 @@ class BooksOnlineHooks {
 		$instanceUrl = $_SESSION["instance-url"];
 
 
-		$orders = new OrderHistory($contactId);
-		$orders->initApi($instanceUrl, $accessToken);
+		$orders = new OrderHistory($instanceUrl, $accessToken, $contactId);
 
-		$subscription = self::$test ? $orders->getSampleSubscription("expiring") : $orders->getCurrentSubscription("Books Online");
+		$subscription = self::$test ? $orders->getSampleSubscription("expiring") : $orders->getCurrentSubscription($contactId, "Books Online");
 
 		// var_dump($subscription);exit;
+		// Request failed or some other unexpected condition,
+		// so bail out.		// var_dump($subscription);exit;
 		// Request failed or some other unexpected condition,
 		// so bail out.
 		if(null == $subscription) return true;
 		
 
 		
-		$daysRemaining = $subscription->getDaysRemaining();
+		$daysRemaining = $subscription->daysRemaining();
 		
 		
 		// Subscription isn't going to expire soon,
@@ -85,6 +87,7 @@ class BooksOnlineHooks {
 			] );
 			$out->addHTML($message);
 		}
+		
 		
 
 		return true;

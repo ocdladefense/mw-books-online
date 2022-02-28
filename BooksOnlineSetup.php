@@ -20,8 +20,8 @@ $dir = dirname( __FILE__ );
 
 
 // $wgExtensionMessagesFiles['BooksOnline'] = $dir . 'BooksOnline.i18n.php';
-$wgAutoloadClasses['Ocdla\BooksOnline'] = $dir .'/classes/Subscription.php';
-$wgAutoloadClasses['Ocdla\BooksOnline'] = $dir .'/classes/OrderHistory.php';
+$wgAutoloadClasses['Ocdla\Subscription'] = $dir .'/classes/Subscription.php';
+$wgAutoloadClasses['Ocdla\OrderHistory'] = $dir .'/classes/OrderHistory.php';
 $wgAutoloadClasses['BooksOnlineHooks'] = $dir .'/BooksOnline.Hooks.php';
 
 $wgHooks['BeforeInitialize'][] = 'BooksOnlineHooks::onBeforeInitialize';

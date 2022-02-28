@@ -1,9 +1,10 @@
 <?php
 
-
-use Salesforce\RestApiRequest;
-
 namespace Ocdla;
+
+
+
+
 
 class Subscription {
 
@@ -16,19 +17,15 @@ class Subscription {
 
 
 
-	public static function daysRemaining($subscription) {
+	public function __construct($OrderItem) {
 
-		// var_dump($subscription);exit;
-		// Request failed or some other unexpected condition,
-		// so bail out.
-		if(null == $subscription) return true;
+		$this->OrderItem = $OrderItem;
+	}
+
+	public function daysRemaining() {
+
 		
-		$orderStartDate = $subscription["Order"]["EffectiveDate"];
-		$startDate = new \DateTime($orderStartDate);
-		
-		// Uncomment to mock an Order EffectiveDate
-		$expiryDate = clone $startDate;
-		$expiryDate->modify("+365 day");
+		$expiryDate = $this->getExpiration();
 
 
 		
@@ -36,8 +33,27 @@ class Subscription {
 	}
 
 
+	
+	public function getExpiration() {
 
-	public static function getAlertHtml($message, $expiryDate, $daysRemaining) {
+		$orderStartDate = $this->OrderItem["Order"]["EffectiveDate"];
+		$startDate = new \DateTime($orderStartDate);
+		
+		// Uncomment to mock an Order EffectiveDate
+		$expiryDate = clone $startDate;
+		$expiryDate->modify("+365 day");
+
+		return $expiryDate;
+	}
+
+
+
+	public function getAlertHtml($message) {
+
+
+		$expiryDate = $this->getExpiration();
+		$daysRemaining = $this->daysRemaining();
+
 
 		$template = "/var/www/html/extensions/BooksOnline/templates/bon-alert.tpl.php";
 		
