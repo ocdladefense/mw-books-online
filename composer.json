@@ -16,7 +16,7 @@
         "ocdladefense/lib-oauth-config": "~2.0",
         "ocdladefense/lib-salesforce-rest-api":"~3.0",
         "ocdladefense/lib-http":"~3.0",
-        "ocdladefense/lib-php-template":"dev-development",
+        "ocdladefense/lib-php-template":"~1.0",
         "ocdladefense/lib-date":"dev-development"
     }
 }
